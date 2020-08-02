@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文主要翻译自论文Generalizing from a Few Examples: A Survey on Few-Shot Learning的前两部分，这两部分对于小样本学习有了简要的介绍，并给出了形式上的定义，同时对于小样本学习在机器学习领域中的地位做出了梳理，并阐述了与机器学习相关问题的区别和联系。 文章将小样本学习的工作分为三个方向，后面几个部分主要是对于各个方向的工作进行了系统性总结，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介">
+<meta property="og:url" content="http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="Lingzhi&#39;s Blog">
+<meta property="og:description" content="本文主要翻译自论文Generalizing from a Few Examples: A Survey on Few-Shot Learning的前两部分，这两部分对于小样本学习有了简要的介绍，并给出了形式上的定义，同时对于小样本学习在机器学习领域中的地位做出了梳理，并阐述了与机器学习相关问题的区别和联系。 文章将小样本学习的工作分为三个方向，后面几个部分主要是对于各个方向的工作进行了系统性总结，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020071813461537.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020071813461558.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200718134614928.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-08-02T13:56:55.000Z">
+<meta property="article:modified_time" content="2020-08-02T14:09:11.957Z">
+<meta property="article:author" content="Lingzhi Wang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2020071813461537.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/07/29/hello-world/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&text=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&is_video=false&description=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介&body=Check out this article: http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&name=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&t=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E6%96%87%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">本文的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD%E5%92%8C%E6%A0%87%E6%B3%A8"><span class="toc-number">2.2.</span> <span class="toc-text">术语和标注</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">3.</span> <span class="toc-text">概览</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="toc-number">3.1.</span> <span class="toc-text">问题定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%9A%84%E5%AD%A6%E4%B9%A0%E9%97%AE%E9%A2%98"><span class="toc-number">3.2.</span> <span class="toc-text">相关的学习问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FSL%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98"><span class="toc-number">3.3.</span> <span class="toc-text">FSL的核心问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%8F%E9%AA%8C%E8%AF%AF%E5%B7%AE%E9%A3%8E%E9%99%A9%E7%9A%84%E6%9C%80%E5%B0%8F%E5%8C%96"><span class="toc-number">3.3.1.</span> <span class="toc-text">经验误差风险的最小化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E5%8F%AF%E9%9D%A0%E7%9A%84%E5%AE%9E%E9%99%85%E8%AF%AF%E5%B7%AE%E6%9C%80%E5%B0%8F%E5%8C%96"><span class="toc-number">3.3.2.</span> <span class="toc-text">不可靠的实际误差最小化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FSL%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">3.4.</span> <span class="toc-text">FSL的分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">4.</span> <span class="toc-text">数据层面的FSL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">5.</span> <span class="toc-text">模型层面的FSL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">6.</span> <span class="toc-text">算法层面的FSL</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Lingzhi's Blog</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-02T13:56:55.000Z" itemprop="datePublished">2020-08-02</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文主要翻译自论文Generalizing from a Few Examples: A Survey on Few-Shot Learning的前两部分，这两部分对于小样本学习有了简要的介绍，并给出了形式上的定义，同时对于小样本学习在机器学习领域中的地位做出了梳理，并阐述了与机器学习相关问题的区别和联系。</p>
+<p>文章将小样本学习的工作分为三个方向，后面几个部分主要是对于各个方向的工作进行了系统性总结，受时间和能力所限，具体算法罗列的部分本文并没有翻译，只是列出作者在文章中总结的几个表格，感兴趣的读者可根据前面对于分类的介绍以及自己的问题按需查找原文中的相应部分。</p>
+<blockquote>
+<p>原文链接：<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1904.05046.pdf">https://arxiv.org/pdf/1904.05046.pdf</a></p>
+</blockquote>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>机器学习在数据挖掘和应用上取得了巨大的成功，但当数据集比较小时，其效果往往会大打折扣。近来人们提出小样本学习（Few-Shot Learning FSL）来解决这一问题。通过使用先验知识，FSL可以迅速适应新的任务，即便此时我们只有一小部分有监督的样本。在本文中，我们对于这一领域展开了一次全面的归纳总结。首先我们给FSL问题一个定义，将其明确为机器学习领域中一个独立的问题。接着我们指出，FSL的核心问题是基于经验给出的判断可能是不可靠的。根据先验知识在这个问题上不同的应用方式，我们可以将FSL方法分成三个流派：(i)通过数据，这种方法通过先验知识对我们手中有标签的小样本进行扩充和增强；(ii)通过模型，可以通过先验知识缩小我们未知的假设范围；(iii)通过算法，这种方法利用先验知识帮助我们在一个问题未知的解空间中更好地搜索出较优的结果。我们讨论了各类方法的优缺点，以及问题定义/解决方式和理论研究中一些可能的方向。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>“机器可以思考吗？：1950年Alan Turing在其著名论文<em>Computing Machinery and Intelligence</em>中提出了这个问题。他说：”电子计算机发展的思路可以解释为让机器去完成人类可以完成的任何事情“。换句话说，计算机发展的终极目标是和人类一样智能，近年来随着计算技术（GPU和分布式平台），大规模数据集，前沿算法模型（卷积神经网络（CNN）和长短时神经网络（LSTM））的兴起，人工智能大步向前发展，在很多方面都超过了人类。比如AlphaGo在围棋这项人类古老的运动中打败了人类的冠军；残差神经网络(ResNet)在图像分类的问题上也取得了比人类更好的成绩。人工智能同样在日常生活中被广泛应用，比如语音助手/搜索引擎/自动假设和工业机器人。<br>虽然人工智能行业一派欣欣向荣，但是现阶段的人工智能还缺乏从小样本数据集进行学习的能力。前述的大部分成果都是建立在大规模数据集之上的。相反，人类则可以迅速利用之前的知识来处理新的问题。比如一个儿童可以通过学习加法轻松理解乘法，一个人只需要几张照片就可以从人群中准确找到目标。<br>打通人工智能和人类的这一壁垒是一个很重要的方向，机器学习便是用来解决这一问题的，它可以构建根据经验自动改善性能的电脑程序。为了从有限的样本中进行学习，机器学习中的一种新的问题和范式被定义，即小样本学习（FSL）。一个典型的例子时字符串生成，给定一些例子，计算机程序被要求去解析并生成新的手写字符。为了解决这一问题，一种方法是把字符分解成可以在不同字符之间通用的部分，然后将这些部分组合在一起成为新的字符，就像人类的学习过程一样。小样本学习可以促进机器人的发展，让其更好地模拟人类的行为。包括单样本模仿，多重武装视觉导航和连续控制。<br>另一个经典的小样本学习应用场景是当出于隐私/安全或伦理原因，有监督的信息极难获取时。典型的例子时药品研发，我们希望发现药品中对于疾病治疗有用的分子结构。因为可能存在的毒性，低活性和低溶解度，新的药物分子可能只有很少的临床记录。因此，高效利用这宝贵的样本就变得十分重要。相似的例子还包括FSL翻译，冷启动推荐系统等。通过小样本学习，利用这些稀有样本得到良好的模型成为了可能。<br>FSL还使得人们不用去寻找大量的数据。比如尽管ResNet可以在分类性能上胜过人类，但是每个类别都需要足够多的样本，这本身有需要很多人类的劳动。FSL可以降低此类数据驱动型任务所需要的数据量，这会使得包括图像分类，图像检索，目标跟踪，姿态识别，视觉问答，图像标注，视频信息检测，语言建模和神经元架构搜索。<br>因为学术研究和实际的双重需要，小样本学习时下是一个热门的话题，包括元学习，嵌入式学习和生成模型等方式纷纷被提出。然而现在还没有一个工作总结和分类这些研究，探究其作用效果和优缺点。因此在本文我们进行了一次全面的总结和归纳。<br>本文的贡献可以简要总结如下：</p>
+<ul>
+<li>我们给出了FSL问题的定义，这个定义与传统的机器学习问题相互联系。这个定义不仅可以概括已有的FSL工作，还可以阐明FSL的目标以及解决方法。这样一个定义对于未来的研究规范化是很有帮助的。</li>
+<li>通过给出足够详实的例子，我们列出了FSL的相关问题，以及他们与FSL的联系和区别。这样的研究帮助我们明确了FSL在机器学习领域中的位置。</li>
+<li>我们指出了FSL问题中的核心问题：即基于经验和实验进行错误风险最小化过程中存在的不稳定性，错误风险最小化问题在机器学习中通过误差分解进行研究。这为推进FSL的发展提供了更具有系统化和结构化的思路指导。</li>
+<li>我们广泛地调研了大量文献，并将其按照数据驱动/模型驱动和算法驱动进行了分类，我们也总结了各个类别的优缺点和研究思想，这些都可以帮助我们更好地理解FSL模型。</li>
+<li>我们提出了FSL问题未来的发展方向，包括问题设定/方法/应用和理论。这些思想基于FSL当下发展中的一些不足，希望可以得到一些可能的解决方案。</li>
+</ul>
+<h3 id="本文的结构"><a href="#本文的结构" class="headerlink" title="本文的结构"></a>本文的结构</h3><p>第二部分对FSL进行概览性的介绍，包括形式化的定义，相关的问题，核心问题，以及已有工作的分类。第三部分是解决FSL问题的数据增强方法；第四部分是缩减未知空间的方法；第5部分包括了通过调整搜索算法来处理FSL问题的方法；第6部分我们提出了FSL问题的发展方向；最后第7部分包含了对本文的总结。</p>
+<h3 id="术语和标注"><a href="#术语和标注" class="headerlink" title="术语和标注"></a>术语和标注</h3><p>考虑一个学习任务$T$，一般情况下我们都会有一个测试集和一个训练集，二者共同组成了该问题$T$的数据集$D$，$D={D_{train},D_{test}}$，其中的训练集$D_{train}$包含了若干样本点$D_{train}={(x_i,y_i)}<em>{i=1}^{I}$，但样本点的个数$I$在FSL问题中是很少的。我们用$p(x,y)$代表真实数据样本$x$和$y$的联合概率密度，而映射$\hat{h}$代表着从$x$到$y$的最佳预测，机器学习的任务本质上就是根据训练集$D</em>{train}$在许多个可能的预测假设$h$中找到最佳的$\hat{h}$，而“最佳”则是由测试集$D_{test}$上的表现决定的。为了近似最佳的$\hat{h}$，我们需要在一个包含很多预测映射的空间$\mathcal{H}$中搜索，这个空间不妨定义为“模型假设空间”或者说“模型搜索空间”。空间中的每一个点$h(·;\theta)$都代表一个预测映射，其中$\theta$代表这个映射中的全部参数。我们认为模型假设是与参数高度相关的，非参数的模型假设往往需要大量数据，这对于FSL问题是不现实的。一个FSL算法即为一种最优化的搜索策略，目的是从模型搜索空间$\mathcal{H}$中找到能够最好拟合$\hat{h}$的参数$\theta$。对于参数模型$h(·;\theta)$，我们可以得到预测值$\hat{y}$，FSL的性能就通过这个预测值和真值之间的二元损失函数$loss(\hat{y},y)$来定义。</p>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>在这部分，我们首先通过足够详实的例子给出FSL的形式化定义。为了将其与其他学习问题区别开来，我们还讨论了其与其他问题的联系和区别。接下来我们讨论了使得FSL变得棘手的核心问题。本部分的最后一节展示了为了解决FSL核心问题而产生的已有工作的分类。</p>
+<h3 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h3><p>因为FSL是机器学习领域的一个子问题，所以让我们首先回忆机器学习在文献中的定义。</p>
+<blockquote>
+<p>定义：机器学习，是指一个计算机程序$T$，它可以从解决任务的经验$E$中学习，并且得到更良好的性能，这个性能可以用P来表示。</p>
+</blockquote>
+<p>比如我们可以考虑一个图像分类的问题，一个机器学习的程序可以通过从大量训练图片中获取的经验提升在这个问题上的表现，这个表现用准确度衡量。另一个例子是AlphaGo，它通过学习大量人类对局记录和自我对局的记录来提升在围棋运动中的胜率。<br>像上面提出的这些典型的机器学习应用，都需要大量的有监督的样本，但正像我们之前提到的，者在很多情况下往往是很难的。FSL就是机器学习的这样一种特殊情况，它希望在一个很有限的训练集（包含少数有监督的样本）上提升学习的性能。用规范化的形式定义就是：</p>
+<blockquote>
+<p>定义：小样本学习，属于机器学习的一种，但其经验只能从一个有限的数据集中获得。</p>
+</blockquote>
+<p>已经出现的FSL问题主要是有监督的问题，具体来说，小样本分类就是每个类只有一小部分标注的数据，应用场景包括图像分类，情感分析和模式识别。小样本分类器学习出一个分类器，可以从每一个输入预测输出。典型的场景是N-way-K-shot classification 对于N个类，每个类由K个样本组成。FSL还可以用于回归问题，用于估计两个变量的联系。除了有监督的FSL学习以外，FSL的另一个分支是强化学习，目标是在只有一些状态-行动样本的情况下寻找到一个策略。<br>我们总结了FSL的三种典型应用场景：</p>
+<ul>
+<li>作为模仿人类学习的试验台：解决FSL问题是迈向人类智能的关键问题，比如根据少量样本学习生成新字符。像人类那样，计算机程序通过有监督的样本和预先训练的先验知识，我们通过人类视觉来辨别字符是人类生成的还是机器生成的，这样的方法也能用来辨别/解析和生成手写字符。</li>
+<li>从小样本中学习：有些时候学习样本是很难获得的，比如对于药品分子结构的实验，我们对于药品毒性的实验本身是很少的，但是可以用相似分子的情况作为先验知识来改善毒性分类的准确率。</li>
+<li>用以减小所需要的数据量和计算成本：考虑图像分类问题，FSL技术可以用更少的标注图片和其他训练的先验知识改善分类准确率，这种方法往往可以获取更高的泛化能力，也适用于其他样本更多的问题。<br>表2增加了先验知识作为$E$的一部分，如果仅有与任务直接相关的一小部分数据，那么用传统的学习策略肯定是很难得到想要的结果，所以必须加上在我们得到数据之前就已经通过一些方式获得的先验知识。一个典型的例子是贝叶斯学习，它在学习时加入了一个与样本集合无关的先验分布。<br>注：根据样本数目的多少，FSL还分为单样本学习和零样本学习。因为不包括有监督的信息，零样本学习需要其他类似学习任务的一些信息。</li>
+</ul>
+<h3 id="相关的学习问题"><a href="#相关的学习问题" class="headerlink" title="相关的学习问题"></a>相关的学习问题</h3><p>在这一部分，我们讨论一些相关的机器学习问题以及与FSL问题的联系和区别。</p>
+<ul>
+<li>弱监督学习：弱监督学习的样本集合是不完整/不精确/不确切或者是有噪声的，其中不完整样本集合与FSL最为类似。根据是否存在人工介入，弱监督学习可以被分为以下几类。<ul>
+<li>半监督学习：半监督学习是从一小部分有标签的样本和大部分无标签的样本中进行学习，比如文本和网页分类。非负样本学习(Positive-unlabeled learning)是其中一个特例，在这里我们只知道正样本和无标签样本而没有负样本，比如社交网络中的好友推荐，我们只知道一部分用户的好友，而对剩下的用户是不是好友一无所知，因此无法确定谁不是好友。</li>
+<li>主动学习：主动学习选择一部分信息量较高的无标签数据去人工标注，加入了人工选择并人工对数据集进行主动补充，这往往被应用在标注数据代价很高的场景下。<br>从定义上说，弱监督学习只包括分类和回归两类问题，而FSL包括强化学习。而且不完整样本集合的弱监督学习通常只用未被标注的数据作为数据源E，而FSL利用了其他先验知识。也就是说，只有针对先验知识仅包含未标注数据的回归和分类问题，FSL和弱监督学习才是等价的。</li>
+</ul>
+</li>
+<li>不平衡学习（倾斜学习）：不平衡学习是指样本中某一类的样本很少出现，比如劣质品检验和自然灾害预测，它从所有可能的$y$中进行学习。FSL则仅仅利用了部分样本，只是将其他的样本作为先验知识。</li>
+<li>迁移学习：将源任务/领域问题的知识传递给目标任务/领域，应用领域有跨领域推荐，跨时期空间和设备的WIFI定位。领域迁移(Domain adaptation)是一种任务相同但是应用领域不同的迁移学习，比如通过用户对电影的评价分析其对商品的评价。迁移学习在FSL问题中是经常使用的方法。</li>
+<li>元学习(Meta-learning)通过元学习器在不同任务上学习的元知识和数据集来解决全新的问题。元学习器从不同的学习任务中概括共性的信息，并在具体的新问题上进行推广。在学习优化/冷启动问题自然语言指导策略等问题上有广泛应用。元学习可以用来处理FSL问题，在之后会提到，元学习器会被用作先验知识来指导FSL任务，附录A中有详细的介绍。</li>
+</ul>
+<h3 id="FSL的核心问题"><a href="#FSL的核心问题" class="headerlink" title="FSL的核心问题"></a>FSL的核心问题</h3><p>在任何机器学习的问题中，误差都是必然存在的。这一部分我们通过监督学习中的残差分解来说明FSL的核心问题。我们的讨论适用于有监督的分类和回归问题，对强化学习问题也提出了一些启发性的思想和探讨。</p>
+<h4 id="经验误差风险的最小化"><a href="#经验误差风险的最小化" class="headerlink" title="经验误差风险的最小化"></a>经验误差风险的最小化</h4><p>给定loss function，我们希望我们给出的预测策略得到的loss在平均意义下最小。因此我们将loss的期望称为期望风险(expected risk)。但是因为真实数据的分布往往未知，因此我们只能将数据集中的所有样本的loss求平均，称之为实际风险(empirical risk)。我们真正的目标是最小化期望风险，假设这个使得期望风险最小化的为$\hat{h}$，显然我们不可能知道$\hat{h}$，机器学习所做的一切是在一个可能的空间内想尽一些办法逼近$\hat{h}$，假设逼近的结果为$h^*$，这是理论中的第一重近似。但当我们想要用种种方法求$h^*$的时候，发现这对我们来说仍然是不可能的，因为我们无法准确知道期望风险，只得退而求其次，用实际风险去估计期望风险，这又是一重近似。两重近似之后，我们实际得到的模型的损失和真正最小化的损失之间就存在一些差距。这种差距决定了我们可能永远也无法获得最佳的模型，而差距来源于两次近似，换句话说我们模型估计的缺陷是因为无法真正达到$\hat{h}$以及无法真正知道期望损失。因此我们可以将模型与最优解的差距分成两个部分，因近似最优解带来的误差和因为估计期望损失带来的误差，其中与数据有关的是第二部分，因为我们是通过数据集的分布来估计期望损失。<br>因此，减小模型误差就有了三个方向：1.调整数据；2.调整模型以改变搜索空间；3.算法层面，更好同时适应搜索空间和数据集。</p>
+<h4 id="不可靠的实际误差最小化"><a href="#不可靠的实际误差最小化" class="headerlink" title="不可靠的实际误差最小化"></a>不可靠的实际误差最小化</h4><p>回忆误差的来源，估计误差的来源是因为我们用于估计平均损失的数据集和数据的真实分布有差距，通常情况下这可以通过扩大数据量得到解决。但在FSL中，数据集的大小是有限的，对于实际误差的估计偏差可能会更大，实际误差本身不再可靠，那么对于其最小化的尝试本身也就更难，所以FSL的核心问题就在于实际误差的最小化不再可靠。可用数据集和真实数据分布相差越大，那么估计缺陷也会越大。</p>
+<h3 id="FSL的分类"><a href="#FSL的分类" class="headerlink" title="FSL的分类"></a>FSL的分类</h3><p>为了解决上述问题，关键是要使用一些其他信息（先验知识）来减小估计缺陷。相关的工作大致可以分为三个方向。</p>
+<ul>
+<li>数据：这些方法使用先验知识来扩充和增强数据集，在扩充之后的数据集上使用标准的机器学习方法可以得到更精确的结果。</li>
+<li>模型：这种方法利用先验知识将假设空间缩小，这样h在优化时的搜索空间也就更小，估计缺陷也会因此降低，此时尽管数据仍然不多，但是模型的性能也会有很大改观。</li>
+<li>算法：这种方法使用先验知识去搜索假设空间中模型的最优参数。一方面这种被先验知识修正的搜索策略可以提供一个更好的初始点，另一方面会影响搜索策略，使得搜索时不光参考实际误差最小化，还考虑先验的搜索策略。<br>接下来给出了已有工作按照上述划分标准的分类树状图。</li>
+</ul>
+<h2 id="数据层面的FSL"><a href="#数据层面的FSL" class="headerlink" title="数据层面的FSL"></a>数据层面的FSL</h2><p><img src="https://img-blog.csdnimg.cn/2020071813461537.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70" alt="数据层面的主要研究方向"></p>
+<h2 id="模型层面的FSL"><a href="#模型层面的FSL" class="headerlink" title="模型层面的FSL"></a>模型层面的FSL</h2><p><img src="https://img-blog.csdnimg.cn/2020071813461558.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70" alt="模型层面的主要研究方向"></p>
+<h2 id="算法层面的FSL"><a href="#算法层面的FSL" class="headerlink" title="算法层面的FSL"></a>算法层面的FSL</h2><p><img src="https://img-blog.csdnimg.cn/20200718134614928.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xleHVzc3M=,size_16,color_FFFFFF,t_70" alt="算法层面的主要研究方向"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E6%96%87%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">本文的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AF%E8%AF%AD%E5%92%8C%E6%A0%87%E6%B3%A8"><span class="toc-number">2.2.</span> <span class="toc-text">术语和标注</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">3.</span> <span class="toc-text">概览</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="toc-number">3.1.</span> <span class="toc-text">问题定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%9A%84%E5%AD%A6%E4%B9%A0%E9%97%AE%E9%A2%98"><span class="toc-number">3.2.</span> <span class="toc-text">相关的学习问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FSL%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98"><span class="toc-number">3.3.</span> <span class="toc-text">FSL的核心问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%8F%E9%AA%8C%E8%AF%AF%E5%B7%AE%E9%A3%8E%E9%99%A9%E7%9A%84%E6%9C%80%E5%B0%8F%E5%8C%96"><span class="toc-number">3.3.1.</span> <span class="toc-text">经验误差风险的最小化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E5%8F%AF%E9%9D%A0%E7%9A%84%E5%AE%9E%E9%99%85%E8%AF%AF%E5%B7%AE%E6%9C%80%E5%B0%8F%E5%8C%96"><span class="toc-number">3.3.2.</span> <span class="toc-text">不可靠的实际误差最小化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FSL%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">3.4.</span> <span class="toc-text">FSL的分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">4.</span> <span class="toc-text">数据层面的FSL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">5.</span> <span class="toc-text">模型层面的FSL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E5%B1%82%E9%9D%A2%E7%9A%84FSL"><span class="toc-number">6.</span> <span class="toc-text">算法层面的FSL</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&text=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&is_video=false&description=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介&body=Check out this article: http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&title=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&name=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/02/%E3%80%90%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E3%80%91%E5%B0%8F%E6%A0%B7%E6%9C%AC%EF%BC%88Few-Shot%20Learning%EF%BC%89%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/&t=【论文翻译】小样本学习（Few-Shot Learning）背景和主要方向简介"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020
+    Lingzhi Wang
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
